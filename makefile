@@ -1,5 +1,5 @@
 C = g++
-CFLAGS = -Wall -std=c++17
+CFLAGS = -Wall -std=c++20
 DBGFLAGS = -g
 IFLAGS = -I include
 LFLAGS = -lSDL2 -lSDL2_image -lSDL2_ttf

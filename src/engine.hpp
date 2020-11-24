@@ -10,17 +10,30 @@
 
 #include <iostream>
 #include <string>
+#include <unordered_map>
 
-extern const int SCREEN_WIDTH = 640;
-extern const int SCREEN_HEIGHT = 360;
+extern int SCREEN_WIDTH;
+extern int SCREEN_HEIGHT;
 
-extern const SDL_Color COLOR_WHITE = (SDL_Color){ .r = 255, .g = 255, .b = 255, .a = 255 };
-extern const SDL_Color COLOR_RED = (SDL_Color){ .r = 255, .g = 0, .b = 0, .a = 255 };
-extern const SDL_Color COLOR_YELLOW = (SDL_Color){ .r = 255, .g = 255, .b = 0, .a = 255 };
+extern SDL_Color COLOR_WHITE;
+extern SDL_Color COLOR_RED;
+extern SDL_Color COLOR_YELLOW;
 
 class Engine{
 
     public:
+        typedef enum Sprite{
+            BLANK,
+            GOBLIN_BASE,
+            GOBLIN_L_UNARMED,
+            GOBLIN_R_UNARMED
+        } Sprite;
+        typedef struct{
+            SDL_Texture* texture;
+            int x;
+            int y;
+        } SpriteInfo;
+
         // Constructor and destructor
         Engine();
         ~Engine();
@@ -35,12 +48,21 @@ class Engine{
         void clock_init();
         float clock_tick();
 
-        // Rendering Base
+        // Rendering
         void render_clear();
         void render_flip();
         void render_fps();
+        void render_set_draw_color(SDL_Color color);
+        void render_set_viewport(int x, int y, int width, int height);
 
         void render_text(std::string text, SDL_Color color, int x, int y);
+        void render_rect(int x, int y, int width, int height);
+        void render_sprite(Sprite sprite, int x, int y);
+
+        // Textures
+        void texture_load_all();
+        void texture_clean_all();
+        SDL_Texture* texture_load(std::string path);
     private:
         SDL_Window* window;
         SDL_Renderer* renderer;
@@ -48,7 +70,10 @@ class Engine{
 
         TTF_Font* font_small;
 
-        const int SECOND = 1000;
+        SDL_Texture* texture_goblin;
+        std::unordered_map<Sprite, SpriteInfo> spritemap;
+
+        const unsigned long SECOND = 1000;
         const float FRAME_TIME = SECOND / 60.0;
         const float UPDATE_TIME = SECOND / 60.0;
         unsigned long second_before_time;
@@ -58,4 +83,9 @@ class Engine{
         int frames = 0;
         int fps = 0;
         int ups = 0;
+
+        int viewport_x;
+        int viewport_y;
+        int viewport_width;
+        int viewport_height;
 };
