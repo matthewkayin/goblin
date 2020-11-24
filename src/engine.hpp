@@ -16,6 +16,7 @@ extern int SCREEN_WIDTH;
 extern int SCREEN_HEIGHT;
 
 extern SDL_Color COLOR_WHITE;
+extern SDL_Color COLOR_BLACK;
 extern SDL_Color COLOR_RED;
 extern SDL_Color COLOR_YELLOW;
 
@@ -57,6 +58,7 @@ class Engine{
 
         void render_text(std::string text, SDL_Color color, int x, int y);
         void render_rect(int x, int y, int width, int height);
+        void render_fill_rect(int x, int y, int width, int height);
         void render_sprite(Sprite sprite, int x, int y);
 
         // Textures

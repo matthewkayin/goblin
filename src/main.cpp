@@ -8,9 +8,9 @@
 void render_ui(Engine* engine);
 void render_gamestate(Engine* engine, Gamestate::State current_state);
 
-const int UI_MARGIN = 5;
-const int VIEWPORT_WIDTH = 13 * 36;
-const int VIEWPORT_HEIGHT = 288;
+const int UI_MARGIN = 5 * 2;
+const int VIEWPORT_WIDTH = 13 * 36 * 2;
+const int VIEWPORT_HEIGHT = 288 * 2;
 
 int main(){
 
@@ -84,6 +84,13 @@ void render_ui(Engine* engine){
     static const int TEXT_PADDING = 2;
     static const int PANEL_X = UI_MARGIN + VIEWPORT_WIDTH;
     static const int PANEL_WIDTH = UI_WIDTH - VIEWPORT_WIDTH;
+
+    engine->render_set_draw_color(COLOR_BLACK);
+
+    engine->render_fill_rect(0, 0, UI_MARGIN, VIEWPORT_HEIGHT);
+    engine->render_fill_rect(UI_MARGIN, 0, VIEWPORT_WIDTH, UI_MARGIN);
+    engine->render_fill_rect(UI_MARGIN, CHATBOX_Y, UI_WIDTH, CHATBOX_HEIGHT);
+    engine->render_fill_rect(PANEL_X, UI_MARGIN, PANEL_WIDTH, VIEWPORT_HEIGHT + 1);
 
     engine->render_set_draw_color(COLOR_WHITE);
 

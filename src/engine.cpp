@@ -1,9 +1,10 @@
 #include "engine.hpp"
 
-int SCREEN_WIDTH = 640;
-int SCREEN_HEIGHT = 360;
+int SCREEN_WIDTH = 1280;
+int SCREEN_HEIGHT = 720;
 
 SDL_Color COLOR_WHITE = (SDL_Color){ .r = 255, .g = 255, .b = 255, .a = 255 };
+SDL_Color COLOR_BLACK = (SDL_Color){ .r = 0, .g = 0, .b = 0, .a = 255 };
 SDL_Color COLOR_RED = (SDL_Color){ .r = 255, .g = 0, .b = 0, .a = 255 };
 SDL_Color COLOR_YELLOW = (SDL_Color){ .r = 255, .g = 255, .b = 0, .a = 255 };
 
@@ -205,27 +206,22 @@ void Engine::render_rect(int x, int y, int width, int height){
     SDL_RenderDrawRect(renderer, &to_draw);
 }
 
+void Engine::render_fill_rect(int x, int y, int width, int height){
+
+    SDL_Rect to_draw = (SDL_Rect){ .x = x, .y = y, .w = width, .h = height };
+    SDL_RenderFillRect(renderer, &to_draw);
+}
+
 void Engine::render_sprite(Sprite sprite, int x, int y){
 
-    if(x + 36 < 0 || x >= viewport_width || y + 36 < 0 || y >= viewport_height){
+    if(x + 36 <= 0 || x >= viewport_width || y + 36 <= 0 || y >= viewport_height){
 
         return;
     }
 
-    int render_width = 36;
-    int render_height = 36;
-    if(x + render_width > viewport_width){
-
-        render_width = viewport_width - x;
-    }
-    if(y + render_height > viewport_height){
-
-        render_height = viewport_height - y;
-    }
-
     SpriteInfo sprite_info = spritemap.at(sprite);
-    SDL_Rect src_rect = (SDL_Rect){ .x = sprite_info.x * 36, .y = sprite_info.y * 36, .w = render_width, .h = render_height };
-    SDL_Rect dst_rect = (SDL_Rect){ .x = viewport_x + x, .y = viewport_y + y, .w = render_width, .h = render_height };
+    SDL_Rect src_rect = (SDL_Rect){ .x = sprite_info.x * 36, .y = sprite_info.y * 36, .w = 36, .h = 36 };
+    SDL_Rect dst_rect = (SDL_Rect){ .x = viewport_x + x, .y = viewport_y + y, .w = 36, .h = 36 };
 
     SDL_RenderCopy(renderer, sprite_info.texture, &src_rect, &dst_rect);
 }
