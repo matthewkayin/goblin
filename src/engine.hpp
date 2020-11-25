@@ -70,6 +70,7 @@ class Engine{
         SDL_Renderer* renderer;
         bool is_fullscreen;
 
+        const int FONT_SMALL_SIZE = 12;
         TTF_Font* font_small;
 
         SDL_Texture* texture_goblin;

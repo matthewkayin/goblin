@@ -4,13 +4,14 @@
 #include <SDL2/SDL.h>
 
 #include <unordered_map>
+#include <string>
 
-void render_ui(Engine* engine);
+void render_ui(Engine* engine, std::string* log, int log_head);
 void render_gamestate(Engine* engine, Gamestate::State current_state);
 
-const int UI_MARGIN = 5 * 2;
-const int VIEWPORT_WIDTH = 13 * 36 * 2;
-const int VIEWPORT_HEIGHT = 288 * 2;
+const int UI_MARGIN = 10;
+const int VIEWPORT_WIDTH = 936;
+const int VIEWPORT_HEIGHT = 576;
 
 int main(){
 
@@ -64,7 +65,7 @@ int main(){
         engine.render_clear();
 
         render_gamestate(&engine, gamestate.get_state());
-        render_ui(&engine);
+        render_ui(&engine, gamestate.log, gamestate.log_head);
 
         // engine.render_fps();
         engine.render_flip();
@@ -75,13 +76,15 @@ int main(){
     return 0;
 }
 
-void render_ui(Engine* engine){
+void render_ui(Engine* engine, std::string* log, int log_head){
 
     static const int UI_WIDTH = SCREEN_WIDTH - (UI_MARGIN * 2);
     static const int UI_HEIGHT = SCREEN_HEIGHT - (UI_MARGIN * 2);
     static const int CHATBOX_HEIGHT = UI_HEIGHT - VIEWPORT_HEIGHT;
     static const int CHATBOX_Y = UI_MARGIN + VIEWPORT_HEIGHT;
-    static const int TEXT_PADDING = 2;
+    static const int TEXT_PADDING_X = 4;
+    static const int TEXT_PADDING_Y = 6;
+    static const int LINE_HEIGHT = 14;
     static const int PANEL_X = UI_MARGIN + VIEWPORT_WIDTH;
     static const int PANEL_WIDTH = UI_WIDTH - VIEWPORT_WIDTH;
 
@@ -98,15 +101,16 @@ void render_ui(Engine* engine){
     engine->render_rect(UI_MARGIN, CHATBOX_Y, UI_WIDTH, CHATBOX_HEIGHT);
     engine->render_rect(PANEL_X, UI_MARGIN, PANEL_WIDTH, VIEWPORT_HEIGHT + 1);
 
-    engine->render_text("Test log", COLOR_WHITE, UI_MARGIN + TEXT_PADDING, CHATBOX_Y + TEXT_PADDING + 2);
-    engine->render_text("Test log", COLOR_WHITE, UI_MARGIN + TEXT_PADDING, CHATBOX_Y + TEXT_PADDING + 10);
-    engine->render_text("Test log", COLOR_WHITE, UI_MARGIN + TEXT_PADDING, CHATBOX_Y + TEXT_PADDING + 18);
-    engine->render_text("Test log", COLOR_WHITE, UI_MARGIN + TEXT_PADDING, CHATBOX_Y + TEXT_PADDING + 26);
-    engine->render_text("Test log", COLOR_WHITE, UI_MARGIN + TEXT_PADDING, CHATBOX_Y + TEXT_PADDING + 34);
-    engine->render_text("Test log", COLOR_WHITE, UI_MARGIN + TEXT_PADDING, CHATBOX_Y + TEXT_PADDING + 42);
-    engine->render_text("Test log", COLOR_WHITE, UI_MARGIN + TEXT_PADDING, CHATBOX_Y + TEXT_PADDING + 50);
+    for(int i = 0; i < 8; i++){
 
-    engine->render_text("Jerry the Goblin", COLOR_WHITE, PANEL_X + TEXT_PADDING, UI_MARGIN + 4);
+        int index = (log_head + i) % 8;
+        if(log[index] != ""){
+
+            engine->render_text(log[index], COLOR_WHITE, UI_MARGIN + TEXT_PADDING_X, CHATBOX_Y + TEXT_PADDING_Y + (LINE_HEIGHT * i));
+        }
+    }
+
+    engine->render_text("Jerry the Goblin", COLOR_WHITE, PANEL_X + TEXT_PADDING_X, UI_MARGIN + TEXT_PADDING_Y);
 }
 
 void render_gamestate(Engine* engine, Gamestate::State current_state){

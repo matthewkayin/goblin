@@ -1,5 +1,6 @@
 #pragma once
 
+#include <string>
 #include <queue>
 
 class Gamestate{
@@ -24,6 +25,10 @@ class Gamestate{
 
         void update(float delta);
         void process_turn(Input input);
+
+        std::string log[8];
+        int log_head = 0;
+        void log_message(std::string message);
 
         int interpolate_value(int current_value, int next_value);
         State magnify(State state);

@@ -61,7 +61,7 @@ bool Engine::init(std::string title, int width, int height){
 
     set_resolution(width, height);
 
-    font_small = TTF_OpenFont("./res/sds.ttf", 8);
+    font_small = TTF_OpenFont("./res/sds.ttf", FONT_SMALL_SIZE);
     if(font_small == nullptr){
 
         std::cout << "Unable to initialize font_small! SDL Error: " << TTF_GetError() << std::endl;
