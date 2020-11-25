@@ -1,5 +1,7 @@
 #include "gamestate.hpp"
 
+// INIT
+
 Gamestate::Gamestate(){
 
     for(int i = 0; i < 8; i++){
@@ -7,9 +9,17 @@ Gamestate::Gamestate(){
         log[i] = "";
     }
 
-    current_state.player_x = 2;
-    current_state.player_y = 2;
+    sprite_player_base = Sprite::GOBLIN_BASE;
+    sprite_player_larm = Sprite::GOBLIN_L_UNARMED;
+    sprite_player_rarm = Sprite::GOBLIN_R_UNARMED;
+
+    player_x = 2;
+    player_y = 2;
+
+    enemy_spawn(4, 2);
 }
+
+// UPDATE
 
 void Gamestate::input_enqueue(Input event){
 
@@ -21,20 +31,6 @@ void Gamestate::input_enqueue(Input event){
 
 void Gamestate::update(float delta){
 
-    if(shift_timer != 0){
-
-        shift_timer -= delta * (1 + input_queue.size());
-        if(shift_timer <= 0){
-
-            shift_timer = 0;
-            current_state = next_state;
-
-        }else{
-
-            return;
-        }
-    }
-
     if(!input_queue.empty()){
 
         Input input = input_queue.front();
@@ -45,31 +41,78 @@ void Gamestate::update(float delta){
 
 void Gamestate::process_turn(Input input){
 
-    next_state = current_state;
-
+    bool move_player = false;
+    int player_move_x = player_x;
+    int player_move_y = player_y;
     if(input == Input::UP){
 
-        next_state.player_y--;
-        log_message("You moved up.");
+        player_move_y--;
+        move_player = true;
 
     }else if(input == Input::RIGHT){
 
-        next_state.player_x++;
-        log_message("You moved right.");
+        player_move_x++;
+        move_player = true;
 
     }else if(input == Input::DOWN){
 
-        next_state.player_y++;
-        log_message("You moved down.");
+        player_move_y++;
+        move_player = true;
 
     }else if(input == Input::LEFT){
 
-        next_state.player_x--;
-        log_message("You moved left.");
+        player_move_x--;
+        move_player = true;
     }
 
-    shift_timer = SHIFT_DURATION;
+    if(move_player){
+
+        for(unsigned int i = 0; i < enemy.size(); i++){
+
+            if(enemy.at(i).x == player_move_x && enemy.at(i).y == player_move_y){
+
+                log_message("You y(attacked) the spider for r(4 damage).");
+                enemy.at(i).health -= 4;
+                if(enemy.at(i).health <= 0){
+
+                    log_message("r(You killed the spider!)");
+                    enemy.erase(enemy.begin() + i);
+                }
+                move_player = false;
+                break;
+            }
+        }
+    }
+
+    if(move_player){
+
+        player_x = player_move_x;
+        player_y = player_move_y;
+    }
+
+    for(unsigned int i = 0; i < enemy.size(); i++){
+
+        if(enemy.at(i).health <= 0){
+
+
+        }
+    }
 }
+
+// ENEMIES
+
+void Gamestate::enemy_spawn(int x, int y){
+
+    enemy.push_back((Enemy){
+            .sprite = Sprite::MONSTER_SPIDER,
+            .x = x,
+            .y = y,
+            .health = 20,
+            .max_health = 20
+    });
+}
+
+// LOGS
 
 void Gamestate::log_message(std::string message){
 
@@ -83,35 +126,4 @@ void Gamestate::log_message(std::string message){
     }
 
     log[log_head] = message;
-}
-
-int Gamestate::interpolate_value(int current_value, int next_value){
-
-    int diff = next_value - current_value;
-    float shift_percent = 1 - (shift_timer / SHIFT_DURATION);
-    return (int)(current_value + (diff * shift_percent ));
-}
-
-Gamestate::State Gamestate::magnify(State state){
-
-    State return_state = state;
-
-    return_state.player_x *= 36;
-    return_state.player_y *= 36;
-
-    return return_state;
-}
-
-Gamestate::State Gamestate::get_state(){
-
-    State current = magnify(current_state);
-    State next = magnify(next_state);
-
-    if(shift_timer != 0){
-
-        current.player_x = interpolate_value(current.player_x, next.player_x);
-        current.player_y = interpolate_value(current.player_y, next.player_y);
-    }
-
-    return current;
 }

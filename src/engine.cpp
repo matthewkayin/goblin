@@ -200,6 +200,73 @@ void Engine::render_text(std::string text, SDL_Color color, int x, int y){
     SDL_DestroyTexture(text_texture);
 }
 
+void Engine::render_text_multicolor(std::string text, int x, int y){
+
+    int active_x = x;
+
+    while(text.length() != 0){
+
+        std::string to_render;
+        SDL_Color color;
+
+        std::size_t red_pos = text.find("r(");
+        std::size_t yellow_pos = text.find("y(");
+
+        if(red_pos == 0){
+
+            color = COLOR_RED;
+            to_render = text.substr(2, text.find(")") - 2);
+            text = text.substr(text.find(")") + 1);
+
+        }else if(yellow_pos == 0){
+
+            color = COLOR_YELLOW;
+            to_render = text.substr(2, text.find(")") - 2);
+            text = text.substr(text.find(")") + 1);
+
+        }else{
+
+            color = COLOR_WHITE;
+            std::size_t substr_length = text.length();
+            if(red_pos != std::string::npos && red_pos < substr_length){
+
+                substr_length = red_pos;
+            }
+            if(yellow_pos != std::string::npos && yellow_pos < substr_length){
+
+                substr_length = yellow_pos;
+            }
+
+            to_render = text.substr(0, substr_length);
+            text = text.substr(substr_length);
+        }
+
+        SDL_Surface* text_surface = TTF_RenderText_Solid(font_small, to_render.c_str(), color);
+
+        if(text_surface == nullptr){
+
+            std::cout << "Unable to render text to surface! SDL Error: " << TTF_GetError() << std::endl;
+            return;
+        }
+
+        SDL_Texture* text_texture = SDL_CreateTextureFromSurface(renderer, text_surface);
+
+        if(text_texture == nullptr){
+
+            std::cout << "Unable to create texture! SDL Error: " << SDL_GetError() << std::endl;
+        }
+
+        SDL_Rect source_rect = (SDL_Rect){ .x = 0, .y = 0, .w = text_surface->w, .h = text_surface->h };
+        SDL_Rect dest_rect = (SDL_Rect){ .x = active_x, .y = y, .w = text_surface->w, .h = text_surface->h };
+        SDL_RenderCopy(renderer, text_texture, &source_rect, &dest_rect);
+
+        active_x += text_surface->w;
+
+        SDL_FreeSurface(text_surface);
+        SDL_DestroyTexture(text_texture);
+    }
+}
+
 void Engine::render_rect(int x, int y, int width, int height){
 
     SDL_Rect to_draw = (SDL_Rect){ .x = x, .y = y, .w = width, .h = height };
@@ -231,11 +298,13 @@ void Engine::render_sprite(Sprite sprite, int x, int y){
 void Engine::texture_load_all(){
 
     texture_goblin = texture_load("./res/goblin.png");
+    texture_monster = texture_load("./res/monsters.png");
 
     spritemap = {
         {GOBLIN_BASE, (SpriteInfo){ .texture = texture_goblin, .x = 0, .y = 0 }},
         {GOBLIN_L_UNARMED, (SpriteInfo){ .texture = texture_goblin, .x = 1, .y = 0 }},
         {GOBLIN_R_UNARMED, (SpriteInfo){ .texture = texture_goblin, .x = 1, .y = 1 }},
+        {MONSTER_SPIDER, (SpriteInfo){ .texture = texture_monster, .x = 0, .y = 0 }},
     };
 }
 

@@ -7,7 +7,7 @@
 #include <string>
 
 void render_ui(Engine* engine, std::string* log, int log_head);
-void render_gamestate(Engine* engine, Gamestate::State current_state);
+void render_gamestate(Engine* engine, Gamestate* gamestate);
 
 const int UI_MARGIN = 10;
 const int VIEWPORT_WIDTH = 936;
@@ -30,7 +30,7 @@ int main(){
         {SDLK_w, Gamestate::Input::UP},
         {SDLK_d, Gamestate::Input::RIGHT},
         {SDLK_s, Gamestate::Input::DOWN},
-        {SDLK_a, Gamestate::Input::LEFT},
+        {SDLK_a, Gamestate::Input::LEFT}
     };
 
     // Init gamestate
@@ -64,7 +64,7 @@ int main(){
 
         engine.render_clear();
 
-        render_gamestate(&engine, gamestate.get_state());
+        render_gamestate(&engine, &gamestate);
         render_ui(&engine, gamestate.log, gamestate.log_head);
 
         // engine.render_fps();
@@ -106,16 +106,27 @@ void render_ui(Engine* engine, std::string* log, int log_head){
         int index = (log_head + i) % 8;
         if(log[index] != ""){
 
-            engine->render_text(log[index], COLOR_WHITE, UI_MARGIN + TEXT_PADDING_X, CHATBOX_Y + TEXT_PADDING_Y + (LINE_HEIGHT * i));
+            engine->render_text_multicolor(log[index], UI_MARGIN + TEXT_PADDING_X, CHATBOX_Y + TEXT_PADDING_Y + (LINE_HEIGHT * i));
         }
     }
 
     engine->render_text("Jerry the Goblin", COLOR_WHITE, PANEL_X + TEXT_PADDING_X, UI_MARGIN + TEXT_PADDING_Y);
 }
 
-void render_gamestate(Engine* engine, Gamestate::State current_state){
+void render_gamestate(Engine* engine, Gamestate* gamestate){
 
-    engine->render_sprite(Engine::Sprite::GOBLIN_BASE, current_state.player_x, current_state.player_y);
-    engine->render_sprite(Engine::Sprite::GOBLIN_L_UNARMED, current_state.player_x, current_state.player_y);
-    engine->render_sprite(Engine::Sprite::GOBLIN_R_UNARMED, current_state.player_x, current_state.player_y);
+    static const int ENEMY_HEALTHBAR_WIDTH = 32;
+    static const int ENEMY_HEALTHBAR_HEIGHT = 4;
+
+    engine->render_sprite(gamestate->sprite_player_base, gamestate->player_x * 36, gamestate->player_y * 36);
+    engine->render_sprite(gamestate->sprite_player_larm, gamestate->player_x * 36, gamestate->player_y * 36);
+    engine->render_sprite(gamestate->sprite_player_rarm, gamestate->player_x * 36, gamestate->player_y * 36);
+
+    engine->render_set_draw_color(COLOR_RED);
+    for(unsigned int i = 0; i < gamestate->enemy.size(); i++){
+
+        Gamestate::Enemy to_render = gamestate->enemy.at(i);
+        engine->render_sprite(to_render.sprite, to_render.x * 36, to_render.y * 36);
+        engine->render_fill_rect(UI_MARGIN + (to_render.x * 36) + 2, UI_MARGIN + (to_render.y * 36) + 2, (int)(ENEMY_HEALTHBAR_WIDTH * ((float)to_render.health / to_render.max_health)), ENEMY_HEALTHBAR_HEIGHT);
+    }
 }

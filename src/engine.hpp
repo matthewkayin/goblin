@@ -4,6 +4,8 @@
     #define SDL_MAIN_HANDLED
 #endif
 
+#include "sprite.hpp"
+
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_ttf.h>
@@ -23,12 +25,6 @@ extern SDL_Color COLOR_YELLOW;
 class Engine{
 
     public:
-        typedef enum Sprite{
-            BLANK,
-            GOBLIN_BASE,
-            GOBLIN_L_UNARMED,
-            GOBLIN_R_UNARMED
-        } Sprite;
         typedef struct{
             SDL_Texture* texture;
             int x;
@@ -57,6 +53,7 @@ class Engine{
         void render_set_viewport(int x, int y, int width, int height);
 
         void render_text(std::string text, SDL_Color color, int x, int y);
+        void render_text_multicolor(std::string text, int x, int y);
         void render_rect(int x, int y, int width, int height);
         void render_fill_rect(int x, int y, int width, int height);
         void render_sprite(Sprite sprite, int x, int y);
@@ -74,6 +71,7 @@ class Engine{
         TTF_Font* font_small;
 
         SDL_Texture* texture_goblin;
+        SDL_Texture* texture_monster;
         std::unordered_map<Sprite, SpriteInfo> spritemap;
 
         const unsigned long SECOND = 1000;
