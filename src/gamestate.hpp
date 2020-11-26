@@ -11,6 +11,7 @@ class Gamestate{
 
     public:
         typedef struct{
+            std::string name;
             Sprite sprite;
             int x;
             int y;
@@ -39,6 +40,8 @@ class Gamestate{
         void process_turn(Input input);
         void player_take_turn(int move_x, int move_y, int attacking_index);
         void enemy_take_turn(int index, int move_x, int move_y, bool attacks_player);
+
+        int calc_damage(int low_attack, int high_attack, int target_defense);
 
         // Enemies
         void enemy_spawn(int x, int y);

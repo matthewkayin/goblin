@@ -1,9 +1,13 @@
 #include "gamestate.hpp"
 #include "pathfinding.hpp"
 
+#include <cstdlib>
+
 // INIT
 
 Gamestate::Gamestate(){
+
+    srand(time(NULL));
 
     for(int i = 0; i < 8; i++){
 
@@ -17,11 +21,11 @@ Gamestate::Gamestate(){
     player_x = 2;
     player_y = 2;
 
-    player_health = 20;
+    player_health = 100;
     player_max_health = 100;
 
     player_low_attack = 5;
-    player_high_attack = 5;
+    player_high_attack = 7;
     player_defense = 5;
     player_speed = 5;
 
@@ -142,7 +146,7 @@ void Gamestate::process_turn(Input input){
             if(i == 0){
 
                 turns[i][0] = -1;
-                turns[i][1] = (player_speed * 10) + (player_attacking_index != -1 ? 5 : 0) + 2.5;
+                turns[i][1] = (player_speed * 10) + (player_attacking_index != -1 ? 5 : 0) + 2;
 
             }else{
 
@@ -170,7 +174,6 @@ void Gamestate::process_turn(Input input){
 
             if(enemy.at(player_attacking_index).health < 0){
 
-                log_message("You killed the enemy");
                 enemy.erase(enemy.begin() + player_attacking_index);
             }
         }
@@ -185,19 +188,25 @@ void Gamestate::player_take_turn(int move_x, int move_y, int attacking_index){
         // Check if enemy still at square
         if(enemy.at(attacking_index).x == move_x && enemy.at(attacking_index).y == move_y){
 
-            log_message("You attacked the enemy");
-            enemy.at(attacking_index).health -= 4;
+            int damage = calc_damage(player_low_attack, player_high_attack, enemy.at(attacking_index).defense);
+            enemy.at(attacking_index).health -= damage;
+            log_message("You hit the y(" + enemy.at(attacking_index).name + ") for r(" + std::to_string(damage) + " damage.)");
+            if(enemy.at(attacking_index).health <= 0){
+
+                log_message("You have slain the y(" + enemy.at(attacking_index).name + ".)");
+            }
 
         }else{
 
-            log_message("You whiffed the enemy");
+            log_message("You attacked the y(" + enemy.at(attacking_index).name + "), but it stepped out of the way first.");
         }
 
     // If moving
     }else{
 
         // Check if target square is unoccupied
-        if(enemy_occupies(move_x, move_y) == -1){
+        int enemy_occupies_index = enemy_occupies(move_x, move_y);
+        if(enemy_occupies_index == -1){
 
             player_x = move_x;
             player_y = move_y;
@@ -205,7 +214,7 @@ void Gamestate::player_take_turn(int move_x, int move_y, int attacking_index){
         // Else stop; path is blocked
         }else{
 
-            log_message("An enemy has blocked your path!");
+            log_message("The y(" + enemy.at(enemy_occupies_index).name + ") blocked your path.");
         }
     }
 }
@@ -216,16 +225,17 @@ void Gamestate::enemy_take_turn(int index, int move_x, int move_y, bool attack_p
 
         if(player_x == move_x && player_y == move_y){
 
-            player_health -= 2;
+            int damage = calc_damage(enemy.at(index).low_attack, enemy.at(index).high_attack, player_defense);
+            player_health -= damage;
             if(player_health < 0){
 
                 player_health = 0;
             }
-            log_message("An enemy attacked you!");
+            log_message("The y(" + enemy.at(index).name + ") hit you for r(" + std::to_string(damage) + " damage.)");
 
         }else{
 
-            log_message("An enemy whiffed you!");
+            log_message("The y(" + enemy.at(index).name + ") attacked, but you stepped out of the way first.");
         }
 
     }else{
@@ -237,9 +247,15 @@ void Gamestate::enemy_take_turn(int index, int move_x, int move_y, bool attack_p
 
         }else{
 
-            log_message("An enemy had its path blocked!");
+            // log_message("An enemy had its path blocked!");
         }
     }
+}
+
+int Gamestate::calc_damage(int low_attack, int high_attack, int target_defense){
+
+    float attack = low_attack + (std::rand() % (high_attack - low_attack + 1));
+    return (int)((attack * attack) / (attack + target_defense));
 }
 
 // ENEMIES
@@ -247,13 +263,14 @@ void Gamestate::enemy_take_turn(int index, int move_x, int move_y, bool attack_p
 void Gamestate::enemy_spawn(int x, int y){
 
     enemy.push_back((Enemy){
+            .name = "spider",
             .sprite = Sprite::MONSTER_SPIDER,
             .x = x,
             .y = y,
             .health = 20,
             .max_health = 20,
             .low_attack = 5,
-            .high_attack = 5,
+            .high_attack = 7,
             .defense = 5,
             .speed = 5
     });
