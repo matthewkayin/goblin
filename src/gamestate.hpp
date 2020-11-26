@@ -37,6 +37,8 @@ class Gamestate{
         void input_enqueue(Input event);
         void update(float delta);
         void process_turn(Input input);
+        void player_take_turn(int move_x, int move_y, int attacking_index);
+        void enemy_take_turn(int index, int move_x, int move_y, bool attacks_player);
 
         // Enemies
         void enemy_spawn(int x, int y);

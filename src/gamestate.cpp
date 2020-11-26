@@ -100,14 +100,7 @@ void Gamestate::process_turn(Input input){
 
     if(move_player){
 
-        for(unsigned int i = 0; i < enemy.size(); i++){
-
-            if(enemy.at(i).x == player_move_x && enemy.at(i).y == player_move_y){
-
-                player_attacking_index = i;
-                break;
-            }
-        }
+        player_attacking_index = enemy_occupies(player_move_x, player_move_y);
     }
 
     // Determine enemy desired move
@@ -117,10 +110,14 @@ void Gamestate::process_turn(Input input){
         bool attacks_player;
     } EnemyTurn;
 
-    EnemyTurn* enemy_turns = nullptr;
-    if(enemy.size() != 0){
+    if(enemy.size() == 0){
 
-        enemy_turns = new EnemyTurn[enemy.size()];
+        player_take_turn(player_move_x, player_move_y, player_attacking_index);
+
+    }else{
+
+        // Determine what turn enemies will take
+        EnemyTurn enemy_turns[enemy.size()];
         for(unsigned int i = 0; i < enemy.size(); i++){
 
             int direction = pathfind(enemy.at(i).x, enemy.at(i).y, player_x, player_y, map, map_width, map_height);
@@ -132,160 +129,116 @@ void Gamestate::process_turn(Input input){
                 .attacks_player = enemy_move_x == player_x && enemy_move_y == player_y
             };
         }
-    }
 
-    // Sort turns by speed
-    int num_turntakers = 1 + enemy.size();
-    int** turns = new int*[num_turntakers];
-    for(int i = 0; i < num_turntakers; i++){
+        // Sort turns by speed
+        // Each actor gets a speed score = 10 * speed stat
+        // Speed score is then given an extra +5 if attacking so that attackers go first
+        // And players get an extra +2.5 so that they go before actors who would otherwise have the same score
+        int actor_count = 1 + enemy.size();
+        int** turns = new int*[actor_count];
+        for(int i = 0; i < actor_count; i++){
 
-        turns[i] = new int[2];
-        if(i == 0){
+            turns[i] = new int[2];
+            if(i == 0){
 
-            turns[i][0] = -1;
-            turns[i][1] = player_speed;
-
-        }else{
-
-            turns[i][0] = i - 1;
-            turns[i][1] = enemy.at(i - 1).speed;
-        }
-    }
-    quicksort(turns, 0, num_turntakers - 1);
-    int current_first = 0;
-    for(int i = 1; i < num_turntakers; i++){
-
-        if(turns[i][1] != turns[current_first][1]){
-
-            current_first = i;
-        }
-        // If player is not the first of their speed group, make them the first of their speed group
-        if(turns[i][0] == -1 && current_first != i){
-
-            int temp_index = turns[i][0];
-            int temp_value = turns[i][1];
-            turns[i][0] = turns[current_first][0];
-            turns[i][1] = turns[current_first][1];
-            turns[current_first][0] = temp_index;
-            turns[current_first][1] = temp_value;
-            break;
-        }
-    }
-
-    // Take each turn, one speed group at a time
-    unsigned int i = 0;
-    int current_speed_group = turns[i][1];
-    int current_speed_group_start_index = i;
-    bool handling_attackers = true;
-    while(i < enemy.size() + 1){
-
-        // If i refers to player
-        if(turns[i][0] == -1){
-
-            // If handling attackers and player attacking
-            if(handling_attackers && player_attacking_index != -1){
-
-                // Attempt player attack
-                if(enemy.at(player_attacking_index).x == player_move_x && enemy.at(player_attacking_index).y == player_move_y){
-
-                    log_message("You attacked the enemy");
-                    enemy.at(player_attacking_index).health -= 4;
-
-                }else{
-
-                    log_message("You whiffed the enemy");
-                }
-
-            // If handling movers and player moving
-            }else if(!handling_attackers && player_attacking_index == -1){
-
-                // If target square unoccupied, move there
-                if(enemy_occupies(player_move_x, player_move_y) == -1){
-
-                    player_x = player_move_x;
-                    player_y = player_move_y;
-
-                // Else stop; path is blocked
-                }else{
-
-                    log_message("An enemy has blocked your path!");
-                }
-            }
-
-        // Else i will refer to an enemy index
-        }else{
-
-            if(enemy_turns == nullptr){
-
-                std::cout << "Error! Tried to handle enemy turn when enemy turns in null!" << std::endl;
-                return;
-            }
-
-            // If handling attackers and enemy attacking
-            int enemy_index = turns[i][0];
-            if(handling_attackers && enemy_turns[enemy_index].attacks_player){
-
-                // Attempt enemy attack
-                if(player_x == enemy_turns[enemy_index].x && player_y == enemy_turns[enemy_index].y){
-
-                    player_health -= 2;
-                    if(player_health < 0){
-
-                        player_health = 0;
-                    }
-                    log_message("An enemy attacked you!");
-
-                }else{
-
-                    log_message("An enemy whiffed you!");
-                }
-
-            // If handling movers and enemy moving
-            }else if(!handling_attackers && !enemy_turns[enemy_index].attacks_player){
-
-                // If target square unoccupied by enemy or player, move there
-                if(enemy_occupies(enemy_turns[enemy_index].x, enemy_turns[enemy_index].y) == -1 && !(enemy_turns[enemy_index].x == player_x && enemy_turns[enemy_index].y == player_y)){
-
-                    enemy.at(enemy_index).x = enemy_turns[enemy_index].x;
-                    enemy.at(enemy_index).y = enemy_turns[enemy_index].y;
-
-                }else{
-
-                    log_message("An enemy had its path blocked!");
-                }
-            }
-        }
-
-        i++;
-        // If we have reached the end of the current speed group
-        if(i == enemy.size() + 1 || turns[i][1] != current_speed_group){
-
-            if(handling_attackers){
-
-                // Set to handle movers, and turn the index back to the start of the current speed group
-                handling_attackers = false;
-                i = current_speed_group_start_index;
+                turns[i][0] = -1;
+                turns[i][1] = (player_speed * 10) + (player_attacking_index != -1 ? 5 : 0) + 2.5;
 
             }else{
 
-                // Set to handle attackers as we move into the next speed group
-                handling_attackers = true;
+                turns[i][0] = i - 1;
+                turns[i][1] = (enemy.at(i - 1).speed * 10) + (enemy_turns[i - 1].attacks_player ? 5 : 0);
+            }
+        }
+        quicksort(turns, 0, actor_count - 1);
+
+        // Take each turn
+        for(int i = actor_count - 1; i >= 0; i--){
+
+            if(turns[i][0] == -1){
+
+                player_take_turn(player_move_x, player_move_y, player_attacking_index);
+
+            }else{
+
+                int enemy_index = turns[i][0];
+                enemy_take_turn(enemy_index, enemy_turns[enemy_index].x, enemy_turns[enemy_index].y, enemy_turns[enemy_index].attacks_player);
+            }
+        }
+
+        if(player_attacking_index != -1){
+
+            if(enemy.at(player_attacking_index).health < 0){
+
+                log_message("You killed the enemy");
+                enemy.erase(enemy.begin() + player_attacking_index);
             }
         }
     }
+}
 
-    if(player_attacking_index != -1){
+void Gamestate::player_take_turn(int move_x, int move_y, int attacking_index){
 
-        if(enemy.at(player_attacking_index).health < 0){
+    // If attacking
+    if(attacking_index != -1){
 
-            log_message("You killed the enemy");
-            enemy.erase(enemy.begin() + player_attacking_index);
+        // Check if enemy still at square
+        if(enemy.at(attacking_index).x == move_x && enemy.at(attacking_index).y == move_y){
+
+            log_message("You attacked the enemy");
+            enemy.at(attacking_index).health -= 4;
+
+        }else{
+
+            log_message("You whiffed the enemy");
+        }
+
+    // If moving
+    }else{
+
+        // Check if target square is unoccupied
+        if(enemy_occupies(move_x, move_y) == -1){
+
+            player_x = move_x;
+            player_y = move_y;
+
+        // Else stop; path is blocked
+        }else{
+
+            log_message("An enemy has blocked your path!");
         }
     }
+}
 
-    if(enemy_turns != nullptr){
+void Gamestate::enemy_take_turn(int index, int move_x, int move_y, bool attack_player){
 
-        delete[] enemy_turns;
+    if(attack_player){
+
+        if(player_x == move_x && player_y == move_y){
+
+            player_health -= 2;
+            if(player_health < 0){
+
+                player_health = 0;
+            }
+            log_message("An enemy attacked you!");
+
+        }else{
+
+            log_message("An enemy whiffed you!");
+        }
+
+    }else{
+
+        if(enemy_occupies(move_x, move_y) == -1 && !(player_x == move_x && player_y == move_y)){
+
+            enemy.at(index).x = move_x;
+            enemy.at(index).y = move_y;
+
+        }else{
+
+            log_message("An enemy had its path blocked!");
+        }
     }
 }
 
