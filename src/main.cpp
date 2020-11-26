@@ -6,7 +6,7 @@
 #include <unordered_map>
 #include <string>
 
-void render_ui(Engine* engine, std::string* log, int log_head);
+void render_ui(Engine* engine, Gamestate* gamestate);
 void render_gamestate(Engine* engine, Gamestate* gamestate);
 
 const int UI_MARGIN = 10;
@@ -65,7 +65,7 @@ int main(){
         engine.render_clear();
 
         render_gamestate(&engine, &gamestate);
-        render_ui(&engine, gamestate.log, gamestate.log_head);
+        render_ui(&engine, &gamestate);
 
         // engine.render_fps();
         engine.render_flip();
@@ -76,7 +76,7 @@ int main(){
     return 0;
 }
 
-void render_ui(Engine* engine, std::string* log, int log_head){
+void render_ui(Engine* engine, Gamestate* gamestate){
 
     static const int UI_WIDTH = SCREEN_WIDTH - (UI_MARGIN * 2);
     static const int UI_HEIGHT = SCREEN_HEIGHT - (UI_MARGIN * 2);
@@ -89,6 +89,7 @@ void render_ui(Engine* engine, std::string* log, int log_head){
     static const int PANEL_WIDTH = UI_WIDTH - VIEWPORT_WIDTH;
 
     engine->render_set_draw_color(COLOR_BLACK);
+    engine->render_set_offset(0, 0);
 
     engine->render_fill_rect(0, 0, UI_MARGIN, VIEWPORT_HEIGHT);
     engine->render_fill_rect(UI_MARGIN, 0, VIEWPORT_WIDTH, UI_MARGIN);
@@ -101,16 +102,24 @@ void render_ui(Engine* engine, std::string* log, int log_head){
     engine->render_rect(UI_MARGIN, CHATBOX_Y, UI_WIDTH, CHATBOX_HEIGHT);
     engine->render_rect(PANEL_X, UI_MARGIN, PANEL_WIDTH, VIEWPORT_HEIGHT + 1);
 
+    engine->render_set_offset(UI_MARGIN + TEXT_PADDING_X, CHATBOX_Y + TEXT_PADDING_Y);
     for(int i = 0; i < 8; i++){
 
-        int index = (log_head + i) % 8;
-        if(log[index] != ""){
+        int index = (gamestate->log_head + i) % 8;
+        if(gamestate->log[index] != ""){
 
-            engine->render_text_multicolor(log[index], UI_MARGIN + TEXT_PADDING_X, CHATBOX_Y + TEXT_PADDING_Y + (LINE_HEIGHT * i));
+            engine->render_text_multicolor(gamestate->log[index], 0, LINE_HEIGHT * i);
         }
     }
 
-    engine->render_text("Jerry the Goblin", COLOR_WHITE, PANEL_X + TEXT_PADDING_X, UI_MARGIN + TEXT_PADDING_Y);
+    engine->render_set_offset(PANEL_X, UI_MARGIN);
+    engine->render_text("Jerry the Goblin", COLOR_WHITE, TEXT_PADDING_X, TEXT_PADDING_Y);
+
+    engine->render_text("Health", COLOR_WHITE, 28, 24);
+    engine->render_set_draw_color(COLOR_RED);
+    engine->render_fill_rect(112, 24, 200 * ((float)gamestate->player_health / gamestate->player_max_health), LINE_HEIGHT);
+    std::string health_string = std::to_string(gamestate->player_health) + " / " + std::to_string(gamestate->player_max_health);
+    engine->render_text(health_string, COLOR_WHITE, 152, 25);
 }
 
 void render_gamestate(Engine* engine, Gamestate* gamestate){

@@ -1,4 +1,5 @@
 #include "gamestate.hpp"
+#include "pathfinding.hpp"
 
 // INIT
 
@@ -16,7 +17,32 @@ Gamestate::Gamestate(){
     player_x = 2;
     player_y = 2;
 
+    player_health = 20;
+    player_max_health = 100;
+
     enemy_spawn(4, 2);
+
+    map_width = 26;
+    map_height = 16;
+    map = new bool*[map_width];
+    for(int i = 0; i < map_width; i++){
+
+        map[i] = new bool[map_height];
+        for(int j = 0; j < map_height; j++){
+
+            map[i][j] = false;
+        }
+    }
+}
+
+Gamestate::~Gamestate(){
+
+    for(int i = 0; i < map_width; i++){
+
+        delete map[i];
+    }
+
+    delete map;
 }
 
 // UPDATE
@@ -92,9 +118,22 @@ void Gamestate::process_turn(Input input){
 
     for(unsigned int i = 0; i < enemy.size(); i++){
 
-        if(enemy.at(i).health <= 0){
+        int direction = pathfind(enemy.at(i).x, enemy.at(i).y, player_x, player_y, map, map_width, map_height);
+        int enemy_move_x = enemy.at(i).x + direction_vector[direction][0];
+        int enemy_move_y = enemy.at(i).y + direction_vector[direction][1];
 
+        if(enemy_move_x == player_x && enemy_move_y == player_y){
 
+            player_health -= 2;
+            if(player_health < 0){
+
+                player_health = 0;
+            }
+
+        }else{
+
+            enemy.at(i).x = enemy_move_x;
+            enemy.at(i).y = enemy_move_y;
         }
     }
 }

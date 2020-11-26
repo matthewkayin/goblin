@@ -27,6 +27,7 @@ class Gamestate{
 
         // Init
         Gamestate();
+        ~Gamestate();
 
         // Update
         void input_enqueue(Input event);
@@ -59,7 +60,14 @@ class Gamestate{
 
         int player_x;
         int player_y;
+        int player_health;
+        int player_max_health;
+
         std::vector<Enemy> enemy;
+
+        bool** map;
+        int map_width;
+        int map_height;
 
     private:
         std::queue<Input> input_queue;

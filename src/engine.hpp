@@ -51,6 +51,7 @@ class Engine{
         void render_fps();
         void render_set_draw_color(SDL_Color color);
         void render_set_viewport(int x, int y, int width, int height);
+        void render_set_offset(int x, int y);
 
         void render_text(std::string text, SDL_Color color, int x, int y);
         void render_text_multicolor(std::string text, int x, int y);
@@ -89,4 +90,6 @@ class Engine{
         int viewport_y;
         int viewport_width;
         int viewport_height;
+        int render_offset_x;
+        int render_offset_y;
 };

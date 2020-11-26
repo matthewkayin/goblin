@@ -174,6 +174,12 @@ void Engine::render_set_viewport(int x, int y, int width, int height){
     viewport_height = height;
 }
 
+void Engine::render_set_offset(int x, int y){
+
+    render_offset_x = x;
+    render_offset_y = y;
+}
+
 void Engine::render_text(std::string text, SDL_Color color, int x, int y){
 
     SDL_Surface* text_surface = TTF_RenderText_Solid(font_small, text.c_str(), color);
@@ -193,7 +199,7 @@ void Engine::render_text(std::string text, SDL_Color color, int x, int y){
     }
 
     SDL_Rect source_rect = (SDL_Rect){ .x = 0, .y = 0, .w = text_surface->w, .h = text_surface->h };
-    SDL_Rect dest_rect = (SDL_Rect){ .x = x, .y = y, .w = text_surface->w, .h = text_surface->h };
+    SDL_Rect dest_rect = (SDL_Rect){ .x = x + render_offset_x, .y = y + render_offset_y, .w = text_surface->w, .h = text_surface->h };
     SDL_RenderCopy(renderer, text_texture, &source_rect, &dest_rect);
 
     SDL_FreeSurface(text_surface);
@@ -269,13 +275,13 @@ void Engine::render_text_multicolor(std::string text, int x, int y){
 
 void Engine::render_rect(int x, int y, int width, int height){
 
-    SDL_Rect to_draw = (SDL_Rect){ .x = x, .y = y, .w = width, .h = height };
+    SDL_Rect to_draw = (SDL_Rect){ .x = x + render_offset_x, .y = y + render_offset_y, .w = width, .h = height };
     SDL_RenderDrawRect(renderer, &to_draw);
 }
 
 void Engine::render_fill_rect(int x, int y, int width, int height){
 
-    SDL_Rect to_draw = (SDL_Rect){ .x = x, .y = y, .w = width, .h = height };
+    SDL_Rect to_draw = (SDL_Rect){ .x = x + render_offset_x, .y = y + render_offset_y, .w = width, .h = height };
     SDL_RenderFillRect(renderer, &to_draw);
 }
 
