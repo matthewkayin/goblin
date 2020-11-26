@@ -16,6 +16,10 @@ class Gamestate{
             int y;
             int health;
             int max_health;
+            int low_attack;
+            int high_attack;
+            int defense;
+            int speed;
         } Enemy;
         typedef enum Input{
             NOTHING,
@@ -36,6 +40,7 @@ class Gamestate{
 
         // Enemies
         void enemy_spawn(int x, int y);
+        int enemy_occupies(int x, int y);
 
         // Logs
         std::string log[8];
@@ -62,6 +67,10 @@ class Gamestate{
         int player_y;
         int player_health;
         int player_max_health;
+        int player_low_attack;
+        int player_high_attack;
+        int player_defense;
+        int player_speed;
 
         std::vector<Enemy> enemy;
 

@@ -263,7 +263,7 @@ void Engine::render_text_multicolor(std::string text, int x, int y){
         }
 
         SDL_Rect source_rect = (SDL_Rect){ .x = 0, .y = 0, .w = text_surface->w, .h = text_surface->h };
-        SDL_Rect dest_rect = (SDL_Rect){ .x = active_x, .y = y, .w = text_surface->w, .h = text_surface->h };
+        SDL_Rect dest_rect = (SDL_Rect){ .x = active_x + render_offset_x, .y = y + render_offset_y, .w = text_surface->w, .h = text_surface->h };
         SDL_RenderCopy(renderer, text_texture, &source_rect, &dest_rect);
 
         active_x += text_surface->w;

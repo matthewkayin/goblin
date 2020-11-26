@@ -136,3 +136,43 @@ int pathfind(int start_x, int start_y, int goal_x, int goal_y, bool** map, int m
         }
     }
 }
+
+void quicksort(int** array, int low, int high){
+
+    if(low < high){
+
+        int pi = partition(array, low, high);
+
+        quicksort(array, low, pi - 1);
+        quicksort(array, pi + 1, high);
+    }
+}
+
+int partition(int** array, int low, int high){
+
+    int pivot = array[high][1];
+    int i = low - 1;
+
+    for(int j = low; j <= high - 1; j++){
+
+        if(array[j][1] < pivot){
+
+            i++;
+            int temp_key = array[i][0];
+            int temp_val = array[i][1];
+            array[i][0] = array[j][0];
+            array[i][1] = array[j][1];
+            array[j][0] = temp_key;
+            array[j][1] = temp_val;
+        }
+    }
+
+    int temp_key = array[i + 1][0];
+    int temp_val = array[i + 1][1];
+    array[i + 1][0] = array[high][0];
+    array[i + 1][1] = array[high][1];
+    array[high][0] = temp_key;
+    array[high][1] = temp_val;
+
+    return i + 1;
+}

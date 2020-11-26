@@ -127,6 +127,8 @@ void render_gamestate(Engine* engine, Gamestate* gamestate){
     static const int ENEMY_HEALTHBAR_WIDTH = 32;
     static const int ENEMY_HEALTHBAR_HEIGHT = 4;
 
+    engine->render_set_offset(UI_MARGIN, UI_MARGIN);
+
     engine->render_sprite(gamestate->sprite_player_base, gamestate->player_x * 36, gamestate->player_y * 36);
     engine->render_sprite(gamestate->sprite_player_larm, gamestate->player_x * 36, gamestate->player_y * 36);
     engine->render_sprite(gamestate->sprite_player_rarm, gamestate->player_x * 36, gamestate->player_y * 36);
@@ -136,6 +138,6 @@ void render_gamestate(Engine* engine, Gamestate* gamestate){
 
         Gamestate::Enemy to_render = gamestate->enemy.at(i);
         engine->render_sprite(to_render.sprite, to_render.x * 36, to_render.y * 36);
-        engine->render_fill_rect(UI_MARGIN + (to_render.x * 36) + 2, UI_MARGIN + (to_render.y * 36) + 2, (int)(ENEMY_HEALTHBAR_WIDTH * ((float)to_render.health / to_render.max_health)), ENEMY_HEALTHBAR_HEIGHT);
+        engine->render_fill_rect((to_render.x * 36) + 2, (to_render.y * 36) + 2, (int)(ENEMY_HEALTHBAR_WIDTH * ((float)to_render.health / to_render.max_health)), ENEMY_HEALTHBAR_HEIGHT);
     }
 }
