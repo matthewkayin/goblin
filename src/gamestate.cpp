@@ -14,12 +14,15 @@ Gamestate::Gamestate(){
         log[i] = "";
     }
 
+    map.generate();
+
+    Map::Point player_spawn = map.get_player_spawn();
+    player_x = player_spawn.x;
+    player_y = player_spawn.y;
+
     sprite_player_base = Sprite::GOBLIN_BASE;
     sprite_player_larm = Sprite::GOBLIN_L_UNARMED;
     sprite_player_rarm = Sprite::GOBLIN_R_UNARMED;
-
-    player_x = 2;
-    player_y = 2;
 
     player_health = 100;
     player_max_health = 100;
@@ -29,29 +32,11 @@ Gamestate::Gamestate(){
     player_defense = 5;
     player_speed = 5;
 
-    enemy_spawn(4, 2);
-
-    map_width = 26;
-    map_height = 16;
-    map = new bool*[map_width];
-    for(int i = 0; i < map_width; i++){
-
-        map[i] = new bool[map_height];
-        for(int j = 0; j < map_height; j++){
-
-            map[i][j] = false;
-        }
-    }
+    // enemy_spawn(4, 2);
 }
 
 Gamestate::~Gamestate(){
 
-    for(int i = 0; i < map_width; i++){
-
-        delete map[i];
-    }
-
-    delete map;
 }
 
 // UPDATE
@@ -124,7 +109,7 @@ void Gamestate::process_turn(Input input){
         EnemyTurn enemy_turns[enemy.size()];
         for(unsigned int i = 0; i < enemy.size(); i++){
 
-            int direction = pathfind(enemy.at(i).x, enemy.at(i).y, player_x, player_y, map, map_width, map_height);
+            int direction = pathfind(enemy.at(i).x, enemy.at(i).y, player_x, player_y, map.collider, map.width, map.height);
             int enemy_move_x = enemy.at(i).x + direction_vector[direction][0];
             int enemy_move_y = enemy.at(i).y + direction_vector[direction][1];
             enemy_turns[i] = (EnemyTurn){
@@ -208,8 +193,12 @@ void Gamestate::player_take_turn(int move_x, int move_y, int attacking_index){
         int enemy_occupies_index = enemy_occupies(move_x, move_y);
         if(enemy_occupies_index == -1){
 
-            player_x = move_x;
-            player_y = move_y;
+            if(!map.collider_at(move_x, move_y)){
+
+                player_x = move_x;
+                player_y = move_y;
+                map.camera_update(player_x, player_y);
+            }
 
         // Else stop; path is blocked
         }else{

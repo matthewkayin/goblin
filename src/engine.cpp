@@ -301,6 +301,24 @@ void Engine::render_sprite(Sprite sprite, int x, int y){
     SDL_RenderCopy(renderer, sprite_info.texture, &src_rect, &dst_rect);
 }
 
+void Engine::render_tile(int index, int x, int y){
+
+    if(index == -1){
+
+        return;
+    }
+
+    if(x + 36 <= 0 || x >= viewport_width || y + 36 <= 0 || y >= viewport_height){
+
+        return;
+    }
+
+    SDL_Rect src_rect = (SDL_Rect){ .x = (index % tileset_width) * 36, .y = ((int)(index / tileset_width)) * 36, .w = 36, .h = 36 };
+    SDL_Rect dst_rect = (SDL_Rect){ .x = viewport_x + x, .y = viewport_y + y,. w = 36, .h = 36 };
+
+    SDL_RenderCopy(renderer, texture_tileset, &src_rect, &dst_rect);
+}
+
 // TEXTURES
 
 void Engine::texture_load_all(){
@@ -314,6 +332,8 @@ void Engine::texture_load_all(){
         {GOBLIN_R_UNARMED, (SpriteInfo){ .texture = texture_goblin, .x = 1, .y = 1 }},
         {MONSTER_SPIDER, (SpriteInfo){ .texture = texture_monster, .x = 0, .y = 0 }},
     };
+
+    texture_load_tileset();
 }
 
 void Engine::texture_clean_all(){
@@ -342,4 +362,26 @@ SDL_Texture* Engine::texture_load(std::string path){
     SDL_FreeSurface(loaded_surface);
 
     return new_texture;
+}
+
+void Engine::texture_load_tileset(){
+
+    SDL_Surface* loaded_surface = IMG_Load("./res/tileset.png");
+    if(loaded_surface == nullptr){
+
+        std::cout << "Unable to load image! SDL Error: " << IMG_GetError() << std::endl;
+        return;
+    }
+
+    texture_tileset = SDL_CreateTextureFromSurface(renderer, loaded_surface);
+    if(texture_tileset == nullptr){
+
+        std::cout << "Unable to create tileset! SDL Error: " << SDL_GetError() << std::endl;
+        return;
+    }
+
+    tileset_width = loaded_surface->w / 36;
+    tileset_height = loaded_surface->h / 36;
+
+    SDL_FreeSurface(loaded_surface);
 }

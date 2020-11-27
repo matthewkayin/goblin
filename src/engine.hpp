@@ -58,11 +58,13 @@ class Engine{
         void render_rect(int x, int y, int width, int height);
         void render_fill_rect(int x, int y, int width, int height);
         void render_sprite(Sprite sprite, int x, int y);
+        void render_tile(int index, int x, int y);
 
         // Textures
         void texture_load_all();
         void texture_clean_all();
         SDL_Texture* texture_load(std::string path);
+        void texture_load_tileset();
     private:
         SDL_Window* window;
         SDL_Renderer* renderer;
@@ -74,6 +76,10 @@ class Engine{
         SDL_Texture* texture_goblin;
         SDL_Texture* texture_monster;
         std::unordered_map<Sprite, SpriteInfo> spritemap;
+
+        SDL_Texture* texture_tileset;
+        int tileset_width;
+        int tileset_height;
 
         const unsigned long SECOND = 1000;
         const float FRAME_TIME = SECOND / 60.0;

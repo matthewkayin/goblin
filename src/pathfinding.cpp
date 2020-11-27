@@ -10,7 +10,7 @@ int manhatten_distance(int ax, int ay, int bx, int by){
     return abs(bx - ax) + abs(by - ay);
 }
 
-int pathfind(int start_x, int start_y, int goal_x, int goal_y, bool** map, int map_width, int map_height){
+int pathfind(int start_x, int start_y, int goal_x, int goal_y, bool* map, int map_width, int map_height){
 
     typedef struct{
 
@@ -73,7 +73,7 @@ int pathfind(int start_x, int start_y, int goal_x, int goal_y, bool** map, int m
             int child_y = smallest.y + direction_vector[direction][1];
 
             // If out of bounds or a collision, ignore child
-            if(child_x < 0 || child_x >= map_width || child_y < 0 || child_y >= map_height || map[child_x][child_y]){
+            if(child_x < 0 || child_x >= map_width || child_y < 0 || child_y >= map_height || map[child_x + (child_y * map_height)]){
 
                 continue;
             }

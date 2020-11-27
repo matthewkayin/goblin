@@ -10,7 +10,7 @@ void render_ui(Engine* engine, Gamestate* gamestate);
 void render_gamestate(Engine* engine, Gamestate* gamestate);
 
 const int UI_MARGIN = 10;
-const int VIEWPORT_WIDTH = 936;
+const int VIEWPORT_WIDTH = 936; // 26 by 16 tile map
 const int VIEWPORT_HEIGHT = 576;
 
 int main(){
@@ -130,9 +130,24 @@ void render_gamestate(Engine* engine, Gamestate* gamestate){
 
     engine->render_set_offset(UI_MARGIN, UI_MARGIN);
 
-    engine->render_sprite(gamestate->sprite_player_base, gamestate->player_x * 36, gamestate->player_y * 36);
-    engine->render_sprite(gamestate->sprite_player_larm, gamestate->player_x * 36, gamestate->player_y * 36);
-    engine->render_sprite(gamestate->sprite_player_rarm, gamestate->player_x * 36, gamestate->player_y * 36);
+    for(int x = 0; x < 26; x++){
+
+        for(int y = 0; y < 16; y++){
+
+            int tile_x = gamestate->map.camera_x + x;
+            int tile_y = gamestate->map.camera_y + y;
+            if(gamestate->map.is_in_bounds(tile_x, tile_y)){
+
+                engine->render_tile(gamestate->map.tile_at(tile_x, tile_y), x * 36, y * 36);
+            }
+        }
+    }
+
+    int player_x = (gamestate->player_x - gamestate->map.camera_x) * 36;
+    int player_y = (gamestate->player_y - gamestate->map.camera_y) * 36;
+    engine->render_sprite(gamestate->sprite_player_base, player_x, player_y);
+    engine->render_sprite(gamestate->sprite_player_larm, player_x, player_y);
+    engine->render_sprite(gamestate->sprite_player_rarm, player_x, player_y);
 
     engine->render_set_draw_color(COLOR_RED);
     for(unsigned int i = 0; i < gamestate->enemy.size(); i++){

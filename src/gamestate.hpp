@@ -1,6 +1,7 @@
 #pragma once
 
 #include "sprite.hpp"
+#include "map.hpp"
 
 #include <string>
 #include <queue>
@@ -79,9 +80,7 @@ class Gamestate{
 
         std::vector<Enemy> enemy;
 
-        bool** map;
-        int map_width;
-        int map_height;
+        Map map;
 
     private:
         std::queue<Input> input_queue;
