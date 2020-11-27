@@ -54,7 +54,7 @@ class Engine{
         void render_set_offset(int x, int y);
 
         void render_text(std::string text, SDL_Color color, int x, int y);
-        void render_text_multicolor(std::string text, int x, int y);
+        void render_text_multicolor(std::string text, int x, int y, float alpha);
         void render_rect(int x, int y, int width, int height);
         void render_fill_rect(int x, int y, int width, int height);
         void render_sprite(Sprite sprite, int x, int y);

@@ -172,7 +172,7 @@ void Gamestate::process_turn(Input input){
 
         if(player_attacking_index != -1){
 
-            if(enemy.at(player_attacking_index).health < 0){
+            if(enemy.at(player_attacking_index).health <= 0){
 
                 enemy.erase(enemy.begin() + player_attacking_index);
             }

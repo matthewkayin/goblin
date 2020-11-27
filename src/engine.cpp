@@ -206,7 +206,7 @@ void Engine::render_text(std::string text, SDL_Color color, int x, int y){
     SDL_DestroyTexture(text_texture);
 }
 
-void Engine::render_text_multicolor(std::string text, int x, int y){
+void Engine::render_text_multicolor(std::string text, int x, int y, float alpha){
 
     int active_x = x;
 
@@ -246,6 +246,8 @@ void Engine::render_text_multicolor(std::string text, int x, int y){
             to_render = text.substr(0, substr_length);
             text = text.substr(substr_length);
         }
+
+        color.a = 255 * alpha;
 
         SDL_Surface* text_surface = TTF_RenderText_Solid(font_small, to_render.c_str(), color);
 

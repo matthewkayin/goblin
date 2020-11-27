@@ -108,7 +108,8 @@ void render_ui(Engine* engine, Gamestate* gamestate){
         int index = (gamestate->log_head + i) % 8;
         if(gamestate->log[index] != ""){
 
-            engine->render_text_multicolor(gamestate->log[index], 0, LINE_HEIGHT * i);
+            float alpha = 1.0 - (0.1 * i);
+            engine->render_text_multicolor(gamestate->log[index], 0, LINE_HEIGHT * (7 - i), alpha);
         }
     }
 
